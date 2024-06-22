@@ -5,4 +5,5 @@ export interface User {
     email: string;
     phone: string;
     address: string;
+    pdfVisible: boolean; // Add pdfVisible property
 }

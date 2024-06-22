@@ -14,6 +14,7 @@ import Swal from 'sweetalert2';  // Import SweetAlert2
 export class UserformComponent implements OnInit {
 
   userForm: FormGroup;
+  users: User[] = [];  // Define the users property here
 
   constructor(private fb: FormBuilder, private router: Router, private userService: UserService) {
     this.userForm = this.fb.group({
@@ -27,11 +28,37 @@ export class UserformComponent implements OnInit {
   
 
   ngOnInit(): void {
+    this.fetchUsers();
+
     
    }
 
-  
+   fetchUsers() {
+    this.userService.getAllUsers().subscribe(
+      (users: User[]) => {
+        this.users = users; // Assign fetched users to the component property
+      },
+      error => {
+        console.error('Error fetching users:', error);
+      }
+    );
+  }
 
+
+  
+ 
+  updateUser(updatedUser: User) {
+    this.userService.updateUser(updatedUser).subscribe(
+      (result: User) => {
+        console.log('User updated successfully:', result);
+        // Optionally, update the local list of users or fetch them again
+        this.fetchUsers();
+      },
+      error => {
+        console.error('Error updating user:', error);
+      }
+    );
+  }
   onSubmit() {
     if (this.userForm.valid) {
       this.userService.addUser(this.userForm.value).subscribe(
@@ -53,7 +80,15 @@ export class UserformComponent implements OnInit {
       Swal.fire('Invalid Form', 'Please fill all required fields correctly', 'warning'); // Invalid form alert
     }
   }
-
+  edit(user: User) {
+    this.userForm.patchValue({
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      address: user.address
+    });
+  }
+  
   private markAllAsTouched() {
     this.userForm.markAllAsTouched();
   }

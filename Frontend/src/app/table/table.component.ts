@@ -68,6 +68,8 @@ export class TableComponent implements OnInit {
       console.error('Error generating PDF:', error);
     });
   }
+
+  
   edit(user: User): void {
     // Implement edit action
     console.log('Edit:', user);

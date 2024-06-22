@@ -1,36 +1,43 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { User } from '../user';
 import { PdfGeneratorService } from '../service/pdf-generator.service';
 import { UserService } from '../service/user.service';
+
 @Component({
   selector: 'app-pdf-viewer',
   templateUrl: './pdf-viewer.component.html',
   styleUrls: ['./pdf-viewer.component.css']
 })
-
-
-
-export class PdfViewerComponent implements OnInit {
-
-
-    @Input() users: User[] = [];
-   
-    @Output() downloadPdf = new EventEmitter<User>();
-
+export class PdfViewerComponent {
   constructor(private userService: UserService, private pdfGeneratorService: PdfGeneratorService) { }
+
+  @Input() users: User[] = [];
+
   ngOnInit(): void {
-  
+    this.loadUsers();
   }
 
-  // Add logic to display PDF
+  loadUsers(): void {
+    this.userService.getAllUsers().subscribe(
+      users => {
+        this.users = users.map(user => ({ ...user, pdfVisible: false }));
+      },
+      error => {
+        console.error('Error loading users:', error);
+      }
+    );
+  }
 
+  downloadPdf(user: User): void {
+    this.pdfGeneratorService.generatePDF(user);
+  }
 
-  download(user: User): void {
-    // Call PdfGeneratorService to generate and download PDF
-    this.pdfGeneratorService.generatePDF(user).then(() => {
-      console.log('PDF generated and downloaded successfully');
-    }).catch(error => {
-      console.error('Error generating PDF:', error);
-    });
+  generatePdfLink(user: User): string {
+    // Replace with your logic to generate the PDF link
+    return `/api/pdf/${user.id}`;
+  }
+
+  togglePdfViewer(user: User): void {
+    user.pdfVisible = !user.pdfVisible;
   }
 }

@@ -48,7 +48,7 @@ export class PdfGeneratorService {
   }
 
 
-  async generatePDF2(): Promise<void> {
+async generatePDF2(): Promise<void> {
     try {
       const users = await this.userService.getAllUsers().toPromise(); // Fetch all users data
 
@@ -58,11 +58,13 @@ export class PdfGeneratorService {
       }
 
       const pdfDoc = await PDFDocument.create();
-      const { height } = pdfDoc.addPage().getSize();
+      const page = pdfDoc.addPage();
+      const { width, height } = page.getSize();
+      
       let y = height - 50; // Starting Y position for text
 
       // Add user data to PDF
-      users.forEach((currentUser, index) => { // Rename 'user' to 'currentUser' to avoid conflict
+      users.forEach((currentUser, index) => {
         if (index > 0) {
           pdfDoc.addPage(); // Add a new page for each user after the first
           y = height - 50; // Reset Y position for new page
@@ -125,8 +127,9 @@ export class PdfGeneratorService {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   }
-
 }
+
+
 
  
 

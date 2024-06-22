@@ -1,6 +1,38 @@
-<div style="margin-left: 20%;">
-  <!-- PDF display logic here -->
-  <p>PDF Viewer</p>
-
- 
+<div >
+  <div class="container">
+    <h2>PDF Document Viewer</h2>
+    <div class="row">
+      <div *ngFor="let user of users" class="col-3 mb-4">
+        <div class="card">
+          <div class="card-body">
+            <!-- <h5 class="card-title">{{ user.name }}</h5> -->
+            <p class="card-text">Email: {{ user.email }}</p>
+            <p class="card-text">Phone: {{ user.phone }}</p>
+            <!-- <p class="card-text">Address: {{ user.address }}</p> -->
+            <!-- <div *ngIf="user.pdfVisible" class="pdf-viewer">
+              <ngx-extended-pdf-viewer [src]="generatePdfLink(user)" height="400px"></ngx-extended-pdf-viewer>
+              <button class="btn btn-primary mt-2" (click)="togglePdfViewer(user)">
+                Close PDF Viewer
+              </button>
+            </div> -->
+            <div *ngIf="!user.pdfVisible" class="pdf-actions">
+              <!-- <button class="btn btn-outline-primary mr-2" (click)="togglePdfViewer(user)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-pdf" viewBox="0 0 16 16">
+                  <path d="M11.5 0a.5.5 0 0 1 .5.5V5h-2V1a.5.5 0 0 1 .5-.5zm1 1.207V5a2.5 2.5 0 1 0 0 5v.5a2.5 2.5 0 1 0 0 5V15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V1.207a.5.5 0 0 1 .5-.5h7zM9 2H6v1h3V2zM6 4v1h4V4H6zm0 2v1h4V6H6zm0 2v1h4V8H6zm0 2v1h2V10H6z"/>
+                </svg>
+                View PDF
+              </button> -->
+              <button class="btn btn-outline-primary" (click)="downloadPdf(user)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
+                  <path d="M8 1a.5.5 0 0 1 .5.5v6.793l2.646-2.647a.5.5 0 0 1 .708.708l-3.5 3.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L7.5 8.293V1.5a.5.5 0 0 1 .5-.5z"/>
+                  <path d="M4.5 15a.5.5 0 0 1-.5-.5V9a.5.5 0 0 1 1 0v5.5a.5.5 0 0 1-.5.5zM11.5 15a.5.5 0 0 1-.5-.5V9a.5.5 0 0 1 1 0v5.5a.5.5 0 0 1-.5.5z"/>
+                </svg>
+                Download PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
