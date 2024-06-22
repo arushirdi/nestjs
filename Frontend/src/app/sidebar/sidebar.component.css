@@ -1,0 +1,44 @@
+#sidebar {
+    height: 100%;
+    width: 250px;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    overflow-x: hidden;
+    transition: all 0.3s;
+  }
+  
+  #sidebar .sidebar-header {
+    padding: 20px;
+    background: #f8f9fa;
+  }
+  
+  #sidebar ul.components {
+    padding: 20px 0;
+  }
+  
+  #sidebar ul li a {
+    padding: 10px;
+    font-size: 1.1em;
+    display: block;
+    color: #333;
+    text-decoration: none;
+  }
+  
+  #sidebar ul li a:hover {
+    background: #ddd;
+    color: #000;
+  }
+  
+  @media (max-width: 768px) {
+    #sidebar {
+      width: 100%;
+      height: auto;
+      position: relative;
+    }
+    #sidebar ul.components {
+      padding: 10px;
+    }
+  }
+  
