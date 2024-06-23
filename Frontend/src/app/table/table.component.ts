@@ -1,8 +1,11 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { UserService } from '../service/user.service';
-import { User } from '../user';
 import { PdfGeneratorService } from '../service/pdf-generator.service';
+import { User } from '../user';
+import Swal from 'sweetalert2';
+import { Router } from '@angular/router';
+
 
 @Component({
   selector: 'app-table',
@@ -13,27 +16,35 @@ export class TableComponent implements OnInit {
   @Input() users: User[] = [];
   @Output() editUser = new EventEmitter<User>();
   @Output() deleteUser = new EventEmitter<User>();
-  @Output() printUser = new EventEmitter<User>();
   @Output() downloadPdf = new EventEmitter<User>();
 
+  userForm: FormGroup;
   filteredUsers: User[] = [];
   searchTerm: string = '';
   currentPage: number = 1;
-  pageSize: number = 5;
+ 
+  @ViewChild('closeModalButton') closeModalButton!: ElementRef; // Use non-null assertion operator
 
-  constructor(private userService: UserService, private pdfGeneratorService: PdfGeneratorService) { }
+  currentUser: User | null = null; // Store the currently edited user
 
-  ngOnInit(): void {
-    this.filteredUsers = [...this.users];
-    this.updatePagination();
-    this.loadUsers()
+  constructor(private fb: FormBuilder,private router: Router, private userService: UserService, private pdfGeneratorService: PdfGeneratorService) {
+    this.userForm = this.fb.group({
+      name: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      phone: ['', Validators.required],
+      address: ['', Validators.required]
+    });
   }
 
+  ngOnInit(): void {
+    this.loadUsers();
+  }
 
   loadUsers(): void {
     this.userService.getAllUsers().subscribe(
       users => {
         this.users = users;
+        this.updatePagination();
       },
       error => {
         console.error('Error loading users:', error);
@@ -41,17 +52,13 @@ export class TableComponent implements OnInit {
     );
   }
 
-  onDelete(user: any): void {
-    const confirmation = confirm(`
-      Are you sure you want to delete ${user.name}?
-      This action cannot be undone.`);
-    
+  onDelete(user: User): void {
+    const confirmation = confirm(`Are you sure you want to delete ${user.name}? This action cannot be undone.`);
     if (confirmation) {
       this.userService.deleteUser(user.id).subscribe(
         () => {
-          // Filter out the deleted user from the list
           this.users = this.users.filter(u => u.id !== user.id);
-          // Update pagination or any other necessary logic
+          this.updatePagination();
         },
         error => {
           console.error('Error deleting user:', error);
@@ -61,7 +68,6 @@ export class TableComponent implements OnInit {
   }
 
   download(user: User): void {
-    // Call PdfGeneratorService to generate and download PDF
     this.pdfGeneratorService.generatePDF(user).then(() => {
       console.log('PDF generated and downloaded successfully');
     }).catch(error => {
@@ -69,71 +75,62 @@ export class TableComponent implements OnInit {
     });
   }
 
-  
   edit(user: User): void {
-    // Implement edit action
-    console.log('Edit:', user);
-
-    // Assuming you have an edit form component, you can navigate to it and pass the user ID
-    // this.router.navigate(['/edit-user', user.id]);
-
-    // Example of updating inline without navigating to a separate form
-    this.userService.updateUser(user).subscribe(
-      updatedUser => {
-        // Update the user in the local array
-        const index = this.users.findIndex(u => u.id === updatedUser.id);
-        if (index !== -1) {
-          this.users[index] = updatedUser;
-        }
-        // Optionally update the filteredUsers array and pagination logic if needed
-        this.updatePagination();
-      },
-      error => {
-        console.error('Error updating user:', error);
-      }
-    );
+    this.currentUser = user; // Store the currently edited user
+    this.userForm.patchValue({
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      address: user.address
+    });
+    this.editUser.emit(user);
   }
 
-  
+  onUpdate(): void {
+    if (this.currentUser) {
+      const updatedUser: User = { ...this.userForm.value, id: this.currentUser.id };
+      this.userService.updateUser(updatedUser).subscribe(
+        () => {
+          const index = this.users.findIndex(u => u.id === updatedUser.id);
+          if (index !== -1) {
+            this.users[index] = updatedUser;
+          }
+
+          this.userForm.reset(); // Reset the form
+          this.closeModalButton.nativeElement.click(); // Close the modal
+
+          // Show success message and navigate back to table view
+          Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: 'User data updated successfully!',
+            timer: 2000,
+            showConfirmButton: false
+          }).then(() => {
+            // Optionally, navigate to another route after successful submission
+            this.router.navigate(['/table']);
+          });
+        },
+        error => {
+          console.error('Error updating user:', error);
+        }
+      );
+    } else {
+      console.error('No user is being edited.');
+    }
+  }
+
 
   updatePagination(): void {
-    // Filter users based on search term
     this.filteredUsers = this.users.filter(user =>
       user.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
       user.phone.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
       user.address.toLowerCase().includes(this.searchTerm.toLowerCase())
     );
-
-    // Calculate pagination
-    this.goToPage(1); // Reset to first page
-  }
-
-
-
-  goToPage(page: number): void {
-    this.currentPage = page;
-    const startIndex = (this.currentPage - 1) * this.pageSize;
-    this.filteredUsers = this.filteredUsers.slice(startIndex, startIndex + this.pageSize);
+   
   }
 
  
 
-  delete(user: User): void {
-    this.deleteUser.emit(user);
-  }
-
-
-
- 
-
-  // Generate array of pages for pagination
-  get pages(): number[] {
-    const totalPages = Math.ceil(this.filteredUsers.length / this.pageSize);
-    return Array(totalPages).fill(0).map((x, i) => i + 1);
-  }
-
-  get totalPages(): number {
-    return Math.ceil(this.filteredUsers.length / this.pageSize);
-  }
 }

@@ -1,46 +1,88 @@
 <div class="row">
-    <div class="col-12">
-        <div class="container-fluid">
-            <!-- Filter input -->
-            <!-- <input type="text" class="form-control mb-3" placeholder="Search..." [(ngModel)]="searchTerm"> -->
-            <div class="table table-hover">
-                <table class="table table-striped table-bordered  table-sm">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                            <th>Address</th>
-                            <th>Actions</th> <!-- New column for actions -->
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let user of users; let i = index">
-                            <td>{{ i + 1 }}</td>
-                            <td>{{ user.name }}</td>
-                            <td>{{ user.email }}</td>
-                            <td>{{ user.phone }}</td>
-                            <td>{{ user.address }}</td>
-                            <td>
-                                <button class="btn btn-primary btn-sm" (click)="edit(user)">
-                                    <i class="bi bi-pencil-fill"></i> Edit
-                                </button>
-                                <button class="btn btn-danger btn-sm" (click)="onDelete(user)">
-                                    <i class="bi bi-trash-fill"></i> Delete
-                                </button>
-
-                                <button class="btn btn-success btn-sm" (click)="download(user)">
-                                    <i class="bi bi-cloud-download-fill"></i> PDF
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-        </div>
-        <!-- PDF Viewer for each user -->
-        <!-- <app-pdf-viewer [users]="users"></app-pdf-viewer> -->
+  <div class="col-12">
+    <div class="container-fluid">
+      <div class="table table-hover">
+        <table class="table table-striped table-bordered table-sm">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Address</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of filteredUsers; let i = index">
+              <td>{{ i + 1 }}</td>
+              <td>{{ user.name }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.phone }}</td>
+              <td>{{ user.address }}</td>
+              <td>
+                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#userModal" (click)="edit(user)">
+                  <i class="bi bi-pencil-fill"></i> Edit
+                </button>
+                <button class="btn btn-danger btn-sm" (click)="onDelete(user)">
+                  <i class="bi bi-trash-fill"></i> Delete
+                </button>
+                <button class="btn btn-success btn-sm" (click)="download(user)">
+                  <i class="bi bi-cloud-download-fill"></i> PDF
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
+  </div>
+</div>
+<div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">Edit User</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" #closeModalButton> <!-- Add template reference variable here -->
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="userForm" (ngSubmit)="onUpdate()" class="p-4 rounded bg-light">
+          <div class="form-group">
+            <label for="name">Name</label>
+            <input id="name" formControlName="name" class="form-control">
+            <div *ngIf="userForm.get('name')?.touched && userForm.get('name')?.errors?.['required']" class="text-danger">
+              Name is required.
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input id="email" formControlName="email" class="form-control">
+            <div *ngIf="userForm.get('email')?.touched && userForm.get('email')?.errors?.['required']" class="text-danger">
+              Email is required.
+            </div>
+            <div *ngIf="userForm.get('email')?.touched && userForm.get('email')?.errors?.['email']" class="text-danger">
+              Enter a valid email.
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone</label>
+            <input id="phone" formControlName="phone" class="form-control">
+            <div *ngIf="userForm.get('phone')?.touched && userForm.get('phone')?.errors?.['required']" class="text-danger">
+              Phone is required.
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="address">Address</label>
+            <input id="address" formControlName="address" class="form-control">
+            <div *ngIf="userForm.get('address')?.touched && userForm.get('address')?.errors?.['required']" class="text-danger">
+              Address is required.
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Update</button>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>
